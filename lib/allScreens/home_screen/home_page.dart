@@ -5,110 +5,65 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-Future<Album> fetchAlbum() async {
-  final response =
-  await http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
-  if (response.statusCode == 200) {
-    // A 200 OK response means
-    // ready to parse the JSON.
-    return Album.fromJson(json.decode(response.body));
-  } else {
-    // If not a 200 ok response
-    // means throw an exception.
-    throw Exception('Failed to load album');
-  }
+  @override
+  State<HomePage> createState() => _HomePageState();
 }
 
-Future<Album> deleteAlbum(String id) async {
-  final http.Response response = await http.delete(
-    Uri.parse('https://jsonplaceholder.typicode.com/albums/$id'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-  );
-
-  if (response.statusCode == 200) {
-    return Album.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('Item Not Deleted!');
-  }
-}
-
-class Album {
-  final int id;
-  final String title;
-
-  Album({required this.id, required this.title});
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      id: json['id'],
-      title: json['title'],
+class _HomePageState extends State<HomePage> {
+  Future getUserData() async {
+    var response = await http.get(
+      Uri.https("jsonplaceholder.typicode.com", "posts"),
     );
+    var jsonData = jsonDecode(response.body);
+    List<UserList> users = [];
+    for (var u in jsonData) {
+      UserList user = UserList(title: u['title'], body: u['body'], id: u['id']);
+      users.add(user);
+    }
+    print(users.length);
+    return users;
   }
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  MyApp({Key key}) : super(key: key);
-
-  @override
-  _MyAppState createState() {
-    return _MyAppState();
-  }
-}
-
-class _MyAppState extends State<MyApp> {
-  late Future<Album> _futureAlbum;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureAlbum = fetchAlbum();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Data Deletion',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: Icon(Icons.add),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('GeeksForGeeks'),
-          backgroundColor: Colors.green,
-        ),
-        body: Center(
-          child: FutureBuilder<Album>(
-            future: _futureAlbum,
+      appBar: AppBar(
+        title: Text("User"),
+        centerTitle: true,
+      ),
+      body: Container(
+        child: Card(
+          child: FutureBuilder(
+            future: getUserData(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text('${snapshot.data?.title ?? 'Deleted'}'),
-                      RaisedButton(
-                        child: Text('Delete Data'),
-                        onPressed: () {
-                          setState(() {
-                            _futureAlbum =
-                                deleteAlbum(snapshot.data.id.toString());
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
+              if (snapshot.data == null) {
+                return Container(
+                  child: Text("loading"),
+                );
+              } else {
+                return ListView.separated(
+                    separatorBuilder: (BuildContext context, int index) =>
+                        Divider(
+                          thickness: 2,
+                        ),
+                    itemCount: (snapshot.data as dynamic).length,
+                    itemBuilder: (context, i) {
+                      return Container(
+                        child: ListTile(
+                          title: Text(
+                            (snapshot.data as dynamic)[i].id.toString(),
+                          ),
+                          subtitle: Text((snapshot.data as dynamic)[i].title),
+                        ),
+                      );
+                    });
               }
-              return CircularProgressIndicator();
             },
           ),
         ),
@@ -116,44 +71,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-// MaterialApp(
-// title: 'Data Deletion',
-// theme: ThemeData(
-// primarySwatch: Colors.blue,
-// ),
-// home: Scaffold(
-// appBar: AppBar(
-// title: Text('GeeksForGeeks'),
-// backgroundColor: Colors.green,
-// ),
-// body: Center(
-// child: FutureBuilder<Album>(
-// future: _futureAlbum,
-// builder: (context, snapshot) {
-// if (snapshot.connectionState == ConnectionState.done) {
-// if (snapshot.hasData) {
-// return Column(
-// mainAxisAlignment: MainAxisAlignment.center,
-// children: <Widget>[
-// Text('${snapshot.data?.title ?? 'Deleted'}'),
-// RaisedButton(
-// child: Text('Delete Data'),
-// onPressed: () {
-// setState(() {
-// _futureAlbum =
-// deleteAlbum(snapshot.data.id.toString());
-// });
-// },
-// ),
-// ],
-// );
-// } else if (snapshot.hasError) {
-// return Text("${snapshot.error}");
-// }
-// }
-// return CircularProgressIndicator();
-// },
-// ),
-// ),
-// ),
-// )
+class UserList {
+  final String title, body;
+  final int id;
+
+  UserList({required this.title, required this.body, required this.id});
+}
+
+
