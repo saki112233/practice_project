@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/allProvider/auth_provider.dart';
 import 'package:untitled9/allScreens/home_screen/home_page.dart';
-import 'package:untitled9/splash_page/splash_screen.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

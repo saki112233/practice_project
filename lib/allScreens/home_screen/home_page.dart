@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,19 +12,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<UserList> users = [];
   Future getUserData() async {
     var response = await http.get(
       Uri.https("jsonplaceholder.typicode.com", "posts"),
     );
     var jsonData = jsonDecode(response.body);
-    List<UserList> users = [];
     for (var u in jsonData) {
-      UserList user = UserList(title: u['title'], body: u['body'], id: u['id']);
+      UserList user = UserList(u['title'], u['body'], u['id']);
       users.add(user);
     }
     print(users.length);
     return users;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,12 +54,54 @@ class _HomePageState extends State<HomePage> {
                         ),
                     itemCount: (snapshot.data as dynamic).length,
                     itemBuilder: (context, i) {
-                      return Container(
+                      Future exitDialog(){
+                        return showDialog(context: context, builder: (context){
+                          return AlertDialog(
+                            title: Text("Delete"),
+                            content: Row(
+                              children: [
+                                ElevatedButton(onPressed: (){
+                                  Navigator.pop(context);
+                                }, child: Text("No")),
+                                SizedBox(width: 20,),
+                                ElevatedButton(onPressed: (){
+                                  setState(() {
+                                    (snapshot.data as dynamic).removeAt(i);
+                                    Navigator.pop(context);
+                                  });
+                                }, child: Text("Yes"))
+                              ],
+                            ),
+                          );
+                        });
+                      }
+                      return Dismissible(
+                        direction: DismissDirection.endToStart,
+                        background: Card(
+                          color: Colors.red,
+                        ),
+                        key: UniqueKey(),
+                        onDismissed: (direction) {
+                          setState(() {
+                            (snapshot.data as dynamic).removeAt(i);
+                          });
+                        },
                         child: ListTile(
+                          onTap: (){},
+                          trailing: IconButton(
+                              key: UniqueKey(),
+                              onPressed: () {
+                                setState(() {
+                                  exitDialog();
+                                });
+                                },
+                              icon: Icon(
+                                Icons.delete,
+                              )),
                           title: Text(
-                            (snapshot.data as dynamic)[i].id.toString(),
+                            (snapshot.data as dynamic)[i].title,
                           ),
-                          subtitle: Text((snapshot.data as dynamic)[i].title),
+                          subtitle: Text((snapshot.data as dynamic)[i].body),
                         ),
                       );
                     });
@@ -71,12 +113,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 class UserList {
   final String title, body;
   final int id;
 
-  UserList({required this.title, required this.body, required this.id});
+  UserList(this.title, this.body, this.id);
 }
-
 
 // gvsgavs
