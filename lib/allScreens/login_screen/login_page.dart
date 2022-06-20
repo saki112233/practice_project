@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvder=Provider.of<AuthProvider>(context);
+    AuthProvider authProvder = Provider.of<AuthProvider>(context);
     final emailField = TextFormField(
       validator: (value) {
         if (value!.isEmpty) {
@@ -153,18 +153,29 @@ class _LoginPageState extends State<LoginPage> {
                       height: 10,
                     ),
                     GestureDetector(
-                        onTap: ()async {
-                          bool isSuccess=await authProvder.handleSignIn();
-                          if(isSuccess){
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                          }
-                        },
-                        child: SvgPicture.asset(
-                          "assets/icons/google-icon.svg",
-                          height: 50,
-                          width: 50,
-                        ),),
-                    Positioned(child: authProvder.status==Status.authenticating?HomePage():SizedBox.shrink())
+                      onTap: () async {
+                        bool isSuccess = await authProvder.handleSignIn();
+                        if (isSuccess) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage(
+
+                                      )));
+                        }
+                      },
+                      child: SvgPicture.asset(
+                        "assets/icons/google-icon.svg",
+                        height: 50,
+                        width: 50,
+                      ),
+                    ),
+                    Positioned(
+                        child: authProvder.status == Status.authenticating
+                            ? HomePage(
+
+                              )
+                            : SizedBox.shrink())
                   ],
                 ),
               ),
@@ -181,10 +192,15 @@ class _LoginPageState extends State<LoginPage> {
           .signInWithEmailAndPassword(email: email, password: password)
           .then((value) => {
                 Fluttertoast.showToast(msg: "Login Success"),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage()))
-              }).catchError((e){
-                Fluttertoast.showToast(msg: e!.message);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomePage(
+
+                            )))
+              })
+          .catchError((e) {
+        Fluttertoast.showToast(msg: e!.message);
       });
     }
   }

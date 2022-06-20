@@ -1,36 +1,40 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:untitled9/allScreens/home_screen/update_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<UserList> users = [];
-  Future getUserData() async {
-    var response = await http.get(
-      Uri.https("jsonplaceholder.typicode.com", "posts"),
-    );
-    var jsonData = jsonDecode(response.body);
-    for (var u in jsonData) {
-      UserList user = UserList(u['title'], u['body'], u['id']);
-      users.add(user);
-    }
-    print(users.length);
-    return users;
+
+  var data;
+   fetchData() async {
+    var response =
+    await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
+    setState((){
+      var decode=jsonDecode(response.body);
+      data=decode;
+      print(data.length);
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    setState((){this.fetchData();});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context,MaterialPageRoute(builder: (context)=>UpdateScreen()));
+        },
         child: Icon(Icons.add),
       ),
       appBar: AppBar(
@@ -38,87 +42,125 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       body: Container(
-        child: Card(
-          child: FutureBuilder(
-            future: getUserData(),
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return Container(
-                  child: Text("loading"),
-                );
-              } else {
-                return ListView.separated(
-                    separatorBuilder: (BuildContext context, int index) =>
-                        Divider(
-                          thickness: 2,
-                        ),
-                    itemCount: (snapshot.data as dynamic).length,
-                    itemBuilder: (context, i) {
-                      Future exitDialog(){
-                        return showDialog(context: context, builder: (context){
-                          return AlertDialog(
-                            title: Text("Delete"),
-                            content: Row(
-                              children: [
-                                ElevatedButton(onPressed: (){
-                                  Navigator.pop(context);
-                                }, child: Text("No")),
-                                SizedBox(width: 20,),
-                                ElevatedButton(onPressed: (){
-                                  setState(() {
-                                    (snapshot.data as dynamic).removeAt(i);
-                                    Navigator.pop(context);
-                                  });
-                                }, child: Text("Yes"))
-                              ],
-                            ),
-                          );
-                        });
-                      }
-                      return Dismissible(
-                        direction: DismissDirection.endToStart,
-                        background: Card(
-                          color: Colors.red,
-                        ),
-                        key: UniqueKey(),
-                        onDismissed: (direction) {
+        child:ListView.separated(
+            separatorBuilder: (BuildContext context, int index) =>
+                Divider(
+                  thickness: 2,
+                ),
+            itemCount:data==null?0: data.length,
+            itemBuilder: (context, i) {
+              Future exitDialog(){
+                return showDialog(context: context, builder: (context){
+                  return AlertDialog(
+                    title: Text("Delete"),
+                    content: Row(
+                      children: [
+                        ElevatedButton(onPressed: (){
+                          Navigator.pop(context);
+                        }, child: Text("No")),
+                        SizedBox(width: 20,),
+                        ElevatedButton(onPressed: (){
                           setState(() {
-                            (snapshot.data as dynamic).removeAt(i);
+                            data.removeAt(i);
+
+                            Navigator.pop(context);
                           });
-                        },
-                        child: ListTile(
-                          onTap: (){},
-                          trailing: IconButton(
-                              key: UniqueKey(),
-                              onPressed: () {
-                                setState(() {
-                                  exitDialog();
-                                });
-                                },
-                              icon: Icon(
-                                Icons.delete,
-                              )),
-                          title: Text(
-                            (snapshot.data as dynamic)[i].title,
-                          ),
-                          subtitle: Text((snapshot.data as dynamic)[i].body),
-                        ),
-                      );
-                    });
+                        }, child: Text("Yes"))
+                      ],
+                    ),
+                  );
+                });
               }
-            },
-          ),
-        ),
+              return Dismissible(
+                direction: DismissDirection.endToStart,
+                background: Card(
+                  color: Colors.red,
+                ),
+                key: UniqueKey(),
+                onDismissed: (direction) {
+                  setState(() {
+                    data.removeAt(i);
+                  });
+                },
+                child: ListTile(
+                  onTap: (){},
+                  trailing: IconButton(
+                      key: UniqueKey(),
+                      onPressed: () {
+                        setState(() {
+                          exitDialog();
+                        });
+                      },
+                      icon: Icon(
+                        Icons.delete,
+                      )),
+                  title: Text(
+                    data[i]["title"],
+                  ),
+                  subtitle: Text(data[i]["body"]),
+                ),
+              );
+            })
       ),
     );
   }
 }
 
-class UserList {
-  final String title, body;
-  final int id;
-
-  UserList(this.title, this.body, this.id);
-}
-
-// gvsgavs
+// ListView.separated(
+// separatorBuilder: (BuildContext context, int index) =>
+// Divider(
+// thickness: 2,
+// ),
+// itemCount: (snapshot.data as dynamic).length,
+// itemBuilder: (context, i) {
+// Future exitDialog(){
+// return showDialog(context: context, builder: (context){
+// return AlertDialog(
+// title: Text("Delete"),
+// content: Row(
+// children: [
+// ElevatedButton(onPressed: (){
+// Navigator.pop(context);
+// }, child: Text("No")),
+// SizedBox(width: 20,),
+// ElevatedButton(onPressed: (){
+// setState(() {
+// (snapshot.data as dynamic).removeAt(i);
+// Navigator.pop(context);
+// });
+// }, child: Text("Yes"))
+// ],
+// ),
+// );
+// });
+// }
+// return Dismissible(
+// direction: DismissDirection.endToStart,
+// background: Card(
+// color: Colors.red,
+// ),
+// key: UniqueKey(),
+// onDismissed: (direction) {
+// setState(() {
+// (snapshot.data as dynamic).removeAt(i);
+// });
+// },
+// child: ListTile(
+// onTap: (){},
+// trailing: IconButton(
+// key: UniqueKey(),
+// onPressed: () {
+// setState(() {
+// exitDialog();
+// });
+// },
+// icon: Icon(
+// Icons.delete,
+// )),
+// title: Text(
+// (snapshot.data as dynamic)[i].title,
+// ),
+// subtitle: Text((snapshot.data as dynamic)[i].body),
+// ),
+// );
+// })
