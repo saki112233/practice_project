@@ -1,35 +1,43 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:untitled9/allProvider/state_provider.dart';
+import 'package:untitled9/allScreens/home_screen/service/home_service.dart';
+import 'package:untitled9/allScreens/home_screen/service/post_service.dart';
 import 'package:untitled9/allScreens/home_screen/update_screen.dart';
+import '../../model/api_model.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
 
-  var data;
-   fetchData() async {
-    var response =
-    await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
-    setState((){
-      var decode=jsonDecode(response.body);
-      data=decode;
-      print(data.length);
-    });
-  }
+
+
+
+  // Future<Data> fetchData() async {
+  //   final response =await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
+  //   if(response.statusCode==200){
+  //     print(response.body);
+  //     return Data.fromJson(jsonDecode(response.body));
+  //
+  //   }else{
+  //     print(response.statusCode);
+  //     throw Exception('Failed');
+  //   }
+  // }
   @override
   void initState() {
     super.initState();
-    setState((){this.fetchData();});
+    ref.read(homeState.notifier).loadData();
+
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Data> data=ref.watch(homeState);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -47,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                 Divider(
                   thickness: 2,
                 ),
-            itemCount:data==null?0: data.length,
+            itemCount:data.length,
             itemBuilder: (context, i) {
               Future exitDialog(){
                 return showDialog(context: context, builder: (context){
@@ -95,9 +103,9 @@ class _HomePageState extends State<HomePage> {
                         Icons.delete,
                       )),
                   title: Text(
-                    data[i]["title"],
+                    data[i].title.toString(),
                   ),
-                  subtitle: Text(data[i]["body"]),
+                  subtitle: Text(data[i].body.toString()),
                 ),
               );
             })
@@ -106,61 +114,4 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ListView.separated(
-// separatorBuilder: (BuildContext context, int index) =>
-// Divider(
-// thickness: 2,
-// ),
-// itemCount: (snapshot.data as dynamic).length,
-// itemBuilder: (context, i) {
-// Future exitDialog(){
-// return showDialog(context: context, builder: (context){
-// return AlertDialog(
-// title: Text("Delete"),
-// content: Row(
-// children: [
-// ElevatedButton(onPressed: (){
-// Navigator.pop(context);
-// }, child: Text("No")),
-// SizedBox(width: 20,),
-// ElevatedButton(onPressed: (){
-// setState(() {
-// (snapshot.data as dynamic).removeAt(i);
-// Navigator.pop(context);
-// });
-// }, child: Text("Yes"))
-// ],
-// ),
-// );
-// });
-// }
-// return Dismissible(
-// direction: DismissDirection.endToStart,
-// background: Card(
-// color: Colors.red,
-// ),
-// key: UniqueKey(),
-// onDismissed: (direction) {
-// setState(() {
-// (snapshot.data as dynamic).removeAt(i);
-// });
-// },
-// child: ListTile(
-// onTap: (){},
-// trailing: IconButton(
-// key: UniqueKey(),
-// onPressed: () {
-// setState(() {
-// exitDialog();
-// });
-// },
-// icon: Icon(
-// Icons.delete,
-// )),
-// title: Text(
-// (snapshot.data as dynamic)[i].title,
-// ),
-// subtitle: Text((snapshot.data as dynamic)[i].body),
-// ),
-// );
-// })
+
