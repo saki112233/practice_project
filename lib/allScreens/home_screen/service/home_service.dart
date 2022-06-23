@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:untitled9/allProvider/state_provider.dart';
 import 'package:untitled9/allScreens/home_screen/service/post_service.dart';
 import 'package:untitled9/model/api_model.dart';
 

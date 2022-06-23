@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:untitled9/allScreens/home_screen/home_page.dart';
+import '../../model/api_model.dart';
 class UpdateScreen extends StatefulWidget {
 
   const UpdateScreen({Key? key,}) : super(key: key);
@@ -9,6 +9,7 @@ class UpdateScreen extends StatefulWidget {
 }
 
 class _UpdateScreenState extends State<UpdateScreen> {
+  List<Data>postList=[];
   @override
   Widget build(BuildContext context) {
     var titleController=TextEditingController();
@@ -38,9 +39,14 @@ class _UpdateScreenState extends State<UpdateScreen> {
               buildTextfield('title',titleController ),
               buildTextfield("body", bodyController),
               SizedBox(height: 20,),
-              ElevatedButton(onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>
-                HomePage()));
+              ElevatedButton(onPressed: ()async{
+                // final abc=await SharedPreferences.getInstance();
+                setState((){
+                  // abc.get(postList.toString());
+                  // print(abc);
+                  Navigator.pop(context);
+                });
+
               }, child: Text('Update',),)
             ],
           ),

@@ -1,21 +1,29 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:untitled9/allProvider/state_provider.dart';
-import 'package:untitled9/allScreens/home_screen/service/home_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/allScreens/home_screen/service/post_service.dart';
 import 'package:untitled9/allScreens/home_screen/update_screen.dart';
 import '../../model/api_model.dart';
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends State<HomePage> {
+  // var dd=dataToJson();
+List<Data>postList=[];
+bool isLoading=false;
+  getPost()async{
+    final prefs=await SharedPreferences.getInstance();
+     isLoading=true;
+   postList=await GetPostService().fetchData();
+   setState((){
+     isLoading=false;
+     prefs.get(postList.toString());
+   });
 
-
-
+  }
 
   // Future<Data> fetchData() async {
   //   final response =await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
@@ -31,13 +39,12 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(homeState.notifier).loadData();
-
+    getPost();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Data> data=ref.watch(homeState);
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -46,16 +53,17 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Icon(Icons.add),
       ),
       appBar: AppBar(
+
         title: Text("User"),
         centerTitle: true,
       ),
       body: Container(
-        child:ListView.separated(
+        child:isLoading?CircularProgressIndicator():ListView.separated(
             separatorBuilder: (BuildContext context, int index) =>
                 Divider(
                   thickness: 2,
                 ),
-            itemCount:data.length,
+            itemCount:postList.length,
             itemBuilder: (context, i) {
               Future exitDialog(){
                 return showDialog(context: context, builder: (context){
@@ -67,10 +75,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                           Navigator.pop(context);
                         }, child: Text("No")),
                         SizedBox(width: 20,),
-                        ElevatedButton(onPressed: (){
-                          setState(() {
-                            data.removeAt(i);
-
+                        ElevatedButton(onPressed: ()async{
+                          print(postList.length);
+                          final pref=await SharedPreferences.getInstance();
+                          setState((){
+                            pref.get(postList.toString());
+                            postList.removeAt(i);
                             Navigator.pop(context);
                           });
                         }, child: Text("Yes"))
@@ -87,7 +97,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 key: UniqueKey(),
                 onDismissed: (direction) {
                   setState(() {
-                    data.removeAt(i);
+                    postList.removeAt(i);
                   });
                 },
                 child: ListTile(
@@ -103,9 +113,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                         Icons.delete,
                       )),
                   title: Text(
-                    data[i].title.toString(),
+                    postList[i].title.toString(),
                   ),
-                  subtitle: Text(data[i].body.toString()),
+                  subtitle: Text(postList[i].body.toString()),
                 ),
               );
             })
