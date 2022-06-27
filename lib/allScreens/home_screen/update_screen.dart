@@ -1,55 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:untitled9/allScreens/home_screen/service/home_list.dart';
 import '../../model/api_model.dart';
-class UpdateScreen extends StatefulWidget {
 
-  const UpdateScreen({Key? key,}) : super(key: key);
+class AddTask extends StatefulWidget {
+  final Function(Data) addUser;
+  const AddTask({
+    Key? key,
+    required this.addUser,
+  }) : super(key: key);
 
   @override
-  State<UpdateScreen> createState() => _UpdateScreenState();
+  State<AddTask> createState() => _AddTaskState();
 }
 
-class _UpdateScreenState extends State<UpdateScreen> {
-  List<Data>postList=[];
+class _AddTaskState extends State<AddTask> {
+  final GlobalKey _formKey = GlobalKey<FormState>();
+  var titleController = TextEditingController();
+  var descriptionController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    var titleController=TextEditingController();
-    var bodyController=TextEditingController();
-    Widget buildTextfield(String hint,TextEditingController controller){
+
+    Widget buildTextfield(String hint, TextEditingController controller,) {
       return Container(
         margin: EdgeInsets.all(4),
-        child: TextField(
+        child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
-            labelText: hint,
+              hintText: hint,
               border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black38
-                )
-              )
-          ),
+                  borderSide: BorderSide(color: Colors.black38))),
         ),
       );
     }
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              buildTextfield('title',titleController ),
-              buildTextfield("body", bodyController),
-              SizedBox(height: 20,),
-              ElevatedButton(onPressed: ()async{
-                // final abc=await SharedPreferences.getInstance();
-                setState((){
-                  // abc.get(postList.toString());
-                  // print(abc);
-                  Navigator.pop(context);
-                });
+    Widget buildDescriptionTextfield(String hint, TextEditingController controller,) {
+    return Container(
+    margin: EdgeInsets.all(4),
+    child: TextFormField(
 
-              }, child: Text('Update',),)
-            ],
-          ),
+    controller: controller,
+    decoration: InputDecoration(
+    hintText: hint,
+    border: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.black38))),
+    ),
+    );
+    }
+    return Container(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            Text(
+              'Update',
+              style: TextStyle(fontSize: 30, color: Colors.lightBlue),
+            ),
+            buildTextfield('tile', titleController,),
+            buildDescriptionTextfield('description', descriptionController),
+            ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    final data = Data(
+                            title: titleController.text,
+                             body: descriptionController.text,
+                         );
+                           Bb.addData(data);
+                  });
+                  // setState((){
+                  //   final data = Data(
+                  //     title: titleController.text,
+                  //     body: descriptionController.text,
+                  //   );
+                  //   Bb.addData(data);
+                  // });
+
+                  Navigator.pop(context);
+                },
+                child: Text('update'))
+          ],
         ),
       ),
     );

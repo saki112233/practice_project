@@ -5,16 +5,16 @@ String dataToJson(List<Data> data) => json.encode(List<dynamic>.from(data.map((x
 
 class Data {
   Data({
-    this.userId,
+     this.userId,
     this.id,
-    this.title,
-    this.body,
+    required this.title,
+    required this.body,
   });
 
   int? userId;
-  int? id;
-  String ? title;
-  String? body;
+  int ?id;
+  String  title;
+  String body;
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     userId: json["userId"],
@@ -31,4 +31,4 @@ class Data {
   };
 }
 
-//nfjdnf
+
